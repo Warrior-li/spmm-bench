@@ -93,7 +93,7 @@ double Matrix::calculate() {
     // Execute SpMM
     CHECK_CUSPARSE( cusparseSpMM(handle,
                  CUSPARSE_OPERATION_NON_TRANSPOSE,
-                 CUSPARSE_OPERATION_TRANSPOSE,
+                 CUSPARSE_OPERATION_NON_TRANSPOSE,
                  &alpha, matA, matB, &beta, matC, CUDA_R_32F,
                  CUSPARSE_SPMM_ALG_DEFAULT, dBuffer));
 
