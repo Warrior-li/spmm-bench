@@ -116,7 +116,7 @@ $(BIN_OUTPUT)/coo_omp_gpu_O3: src/coo/coo_omp_gpu.cpp $(DEPS)
 
 # CuSparse COO
 $(BIN_OUTPUT)/coo_cusparse: src/coo/coo_cusparse.cpp $(DEPS)
-	nvcc -Isrc/coo $(BASE) src/coo/coo_cusparse.cpp -o $(BIN_OUTPUT)/coo_cusparse -Isrc build/libspmm.a -lcusparse -lomp5
+	nvcc -Isrc/coo $(BASE) src/coo/coo_cusparse.cpp -o $(BIN_OUTPUT)/coo_cusparse -Isrc build/libspmm.a -lcusparse -lgomp
 
 ##################################################################################################################################
 
@@ -155,7 +155,7 @@ $(BIN_OUTPUT)/csr_omp_gpu_O3: src/csr/csr_omp_gpu.cpp $(DEPS)
 
 # CuSparse CSR
 $(BIN_OUTPUT)/csr_cusparse: src/csr/csr_cusparse.cpp $(DEPS)
-	nvcc -Isrc/csr $(BASE) src/csr/csr_cusparse.cpp -o $(BIN_OUTPUT)/csr_cusparse -Isrc build/libspmm.a -lcusparse -lomp5
+	nvcc -Isrc/csr $(BASE) src/csr/csr_cusparse.cpp -o $(BIN_OUTPUT)/csr_cusparse -Isrc build/libspmm.a -lcusparse -lgomp
 	
 ##################################################################################################################################
 
