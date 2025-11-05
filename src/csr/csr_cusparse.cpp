@@ -36,15 +36,15 @@ double Matrix::calculate() {
     float *d_values, *dB, *dC;
     CHECK_CUDA( cudaMalloc((void**)&d_rowptr, (rows+1) * sizeof(uint64_t)) )
     CHECK_CUDA( cudaMalloc((void**)&d_rowidx, coo->nnz * sizeof(uint64_t)) )
-    CHECK_CUDA( cudaMalloc((void**)&d_values, coo->nnz * sizeof(double)) )
-    CHECK_CUDA( cudaMalloc((void**)&dB, (rows * cols) * sizeof(double)) )
-    CHECK_CUDA( cudaMalloc((void**)&dC, (rows * cols) * sizeof(double)) )
+    CHECK_CUDA( cudaMalloc((void**)&d_values, coo->nnz * sizeof(float)) )
+    CHECK_CUDA( cudaMalloc((void**)&dB, (rows * cols) * sizeof(float)) )
+    CHECK_CUDA( cudaMalloc((void**)&dC, (rows * cols) * sizeof(float)) )
     
     CHECK_CUDA( cudaMemcpy(d_rowptr, rowptr, (rows+1) * sizeof(uint64_t), cudaMemcpyHostToDevice) )
     CHECK_CUDA( cudaMemcpy(d_rowidx, rowidx, coo->nnz * sizeof(uint64_t), cudaMemcpyHostToDevice) )
-    CHECK_CUDA( cudaMemcpy(d_values, values, coo->nnz * sizeof(double), cudaMemcpyHostToDevice) )
-    CHECK_CUDA( cudaMemcpy(dB, B, (rows * cols) * sizeof(double), cudaMemcpyHostToDevice) )
-    CHECK_CUDA( cudaMemcpy(dC, C, (rows * cols) * sizeof(double), cudaMemcpyHostToDevice) )
+    CHECK_CUDA( cudaMemcpy(d_values, values, coo->nnz * sizeof(float), cudaMemcpyHostToDevice) )
+    CHECK_CUDA( cudaMemcpy(dB, B, (rows * cols) * sizeof(float), cudaMemcpyHostToDevice) )
+    CHECK_CUDA( cudaMemcpy(dC, C, (rows * cols) * sizeof(float), cudaMemcpyHostToDevice) )
     
     cusparseHandle_t     handle = NULL;
     cusparseSpMatDescr_t matA;
