@@ -33,9 +33,6 @@ double Matrix::calculate() {
     //double start = getTime();
     
 
-    warmup<<<1,1>>>();
-    cudaDeviceSynchronize();
-
     uint64_t *d_rowptr, *d_rowidx;
     float *d_values, *dB, *dC;
     CHECK_CUDA( cudaMalloc((void**)&d_rowptr, (rows+1) * sizeof(uint64_t)) )
