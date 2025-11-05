@@ -33,7 +33,7 @@ double Matrix::calculate() {
     //double start = getTime();
     
     uint64_t *d_rowptr, *d_rowidx;
-    double *d_values, *dB, *dC;
+    float *d_values, *dB, *dC;
     CHECK_CUDA( cudaMalloc((void**)&d_rowptr, (rows+1) * sizeof(uint64_t)) )
     CHECK_CUDA( cudaMalloc((void**)&d_rowidx, coo->nnz * sizeof(uint64_t)) )
     CHECK_CUDA( cudaMalloc((void**)&d_values, coo->nnz * sizeof(double)) )
@@ -51,29 +51,29 @@ double Matrix::calculate() {
     cusparseDnMatDescr_t matB, matC;
     void*                dBuffer    = NULL;
     size_t               bufferSize = 0;
-    double  alpha       = 1.0f;
-    double  beta        = 0.0f;
+    float  alpha       = 1.0f;
+    float  beta        = 0.0f;
     
     // Create sparse matrix A in CSR format
     CHECK_CUSPARSE( cusparseCreate(&handle) )
     CHECK_CUSPARSE( cusparseCreateCsr(&matA, rows, cols, coo->nnz,
                           d_rowptr, d_rowidx, d_values,
                           CUSPARSE_INDEX_64I, CUSPARSE_INDEX_64I,
-                          CUSPARSE_INDEX_BASE_ZERO, CUDA_R_64F))
+                          CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F))
     
     // Create dense matrix B
     CHECK_CUSPARSE(cusparseCreateDnMat(&matB, rows, cols, rows, dB,
-                            CUDA_R_64F, CUSPARSE_ORDER_ROW))
+                            CUDA_R_32F, CUSPARSE_ORDER_ROW))
     
     // Create dense matrix C
     CHECK_CUSPARSE(cusparseCreateDnMat(&matC, cols, rows, cols, dC,
-                            CUDA_R_64F, CUSPARSE_ORDER_ROW))
+                            CUDA_R_32F, CUSPARSE_ORDER_ROW))
     
     // Allocate external buffer if needed
     CHECK_CUSPARSE( cusparseSpMM_bufferSize(handle,
                              CUSPARSE_OPERATION_NON_TRANSPOSE,
                              CUSPARSE_OPERATION_NON_TRANSPOSE,
-                             &alpha, matA, matB, &beta, matC, CUDA_R_64F,
+                             &alpha, matA, matB, &beta, matC, CUDA_R_32F,
                              CUSPARSE_SPMM_ALG_DEFAULT, &bufferSize) )
     CHECK_CUDA( cudaMalloc(&dBuffer, bufferSize) )
     
@@ -93,7 +93,7 @@ double Matrix::calculate() {
     CHECK_CUSPARSE( cusparseSpMM(handle,
                  CUSPARSE_OPERATION_NON_TRANSPOSE,
                  CUSPARSE_OPERATION_NON_TRANSPOSE,
-                 &alpha, matA, matB, &beta, matC, CUDA_R_64F,
+                 &alpha, matA, matB, &beta, matC, CUDA_R_32F,
                  CUSPARSE_SPMM_ALG_DEFAULT, dBuffer));
 
     // 结束计时
