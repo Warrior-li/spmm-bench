@@ -32,6 +32,10 @@
 double Matrix::calculate() {
     //double start = getTime();
     
+
+    warmup<<<1,1>>>();
+    cudaDeviceSynchronize();
+
     uint64_t *d_rowptr, *d_rowidx;
     float *d_values, *dB, *dC;
     CHECK_CUDA( cudaMalloc((void**)&d_rowptr, (rows+1) * sizeof(uint64_t)) )
@@ -92,7 +96,7 @@ double Matrix::calculate() {
     // Execute SpMM
     CHECK_CUSPARSE( cusparseSpMM(handle,
                  CUSPARSE_OPERATION_NON_TRANSPOSE,
-                 CUSPARSE_OPERATION_NON_TRANSPOSE,
+                 CUSPARSE_OPERATION_TRANSPOSE,
                  &alpha, matA, matB, &beta, matC, CUDA_R_32F,
                  CUSPARSE_SPMM_ALG_DEFAULT, dBuffer));
 
