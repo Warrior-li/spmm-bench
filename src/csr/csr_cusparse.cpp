@@ -87,6 +87,15 @@ double Matrix::calculate() {
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
 
+
+    // 预热（Warm-up）：执行几次让GPU进入稳态
+    for (int i = 0; i < 10; i++) {
+        cusparseSpMM(handle,
+            CUSPARSE_OPERATION_NON_TRANSPOSE,
+            CUSPARSE_OPERATION_TRANSPOSE,   // ✅ 对齐论文：B转置输入
+            &alpha, matA, matB, &beta, matC,
+            CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, dBuffer);
+    }
     // 确保之前所有操作完成后再开始计时
     cudaDeviceSynchronize();
 
