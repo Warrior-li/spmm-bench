@@ -30,7 +30,7 @@
 // The calculation algorithm for the current format
 //
 double Matrix::calculate() {
-    double start = getTime();
+    //double start = getTime();
     
     uint64_t *d_rowptr, *d_rowidx;
     double *d_values, *dB, *dC;
@@ -124,6 +124,7 @@ double Matrix::calculate() {
     cudaFree(dB);
     cudaFree(dC);
     
-    double end = getTime();
+    //double end = getTime();
     return kernel_time;
+}
 
