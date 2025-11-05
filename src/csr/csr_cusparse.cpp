@@ -84,29 +84,37 @@ double Matrix::calculate() {
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
 
-    // 确保之前所有操作完成后再开始计时
+    // 预热（Warm-up）：执行几次让GPU进入稳态
+    for (int i = 0; i < 10; i++) {
+        cusparseSpMM(handle,
+            CUSPARSE_OPERATION_NON_TRANSPOSE,
+            CUSPARSE_OPERATION_TRANSPOSE,   // ✅ 对齐论文：B转置输入
+            &alpha, matA, matB, &beta, matC,
+            CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, dBuffer);
+    }
     cudaDeviceSynchronize();
 
-    // 开始计时（记录 GPU 时间戳）
+    // 精确计时（ITER次平均）
+    const int ITER = 200;   // ✅ 与论文相同
     cudaEventRecord(start, 0);
-
-    // Execute SpMM
-    CHECK_CUSPARSE( cusparseSpMM(handle,
-                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                 &alpha, matA, matB, &beta, matC, CUDA_R_32F,
-                 CUSPARSE_SPMM_ALG_DEFAULT, dBuffer));
-
-    // 结束计时
+    for (int i = 0; i < ITER; i++) {
+        cusparseSpMM(handle,
+            CUSPARSE_OPERATION_NON_TRANSPOSE,
+            CUSPARSE_OPERATION_TRANSPOSE,   // ✅ 注意保持一致
+            &alpha, matA, matB, &beta, matC,
+            CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, dBuffer);
+    }
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
 
+    // 计算平均时间
     float milliseconds = 0.0f;
     cudaEventElapsedTime(&milliseconds, start, stop);
-    double kernel_time = milliseconds / 1000.0; // 转成秒
+    double kernel_time = (milliseconds / ITER) / 1000.0 / ITER;  // 单次平均秒数
 
     cudaEventDestroy(start);
     cudaEventDestroy(stop);
+
     
     // Destroy matrix descriptors
     cusparseDestroySpMat(matA);
