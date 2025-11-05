@@ -77,12 +77,35 @@ double Matrix::calculate() {
                              CUSPARSE_SPMM_ALG_DEFAULT, &bufferSize) )
     CHECK_CUDA( cudaMalloc(&dBuffer, bufferSize) )
     
+
+    // ---------- 3. 用 CUDA Events 计时 ----------
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
+    // 确保之前所有操作完成后再开始计时
+    cudaDeviceSynchronize();
+
+    // 开始计时（记录 GPU 时间戳）
+    cudaEventRecord(start, 0);
+
     // Execute SpMM
     CHECK_CUSPARSE( cusparseSpMM(handle,
                  CUSPARSE_OPERATION_NON_TRANSPOSE,
                  CUSPARSE_OPERATION_NON_TRANSPOSE,
                  &alpha, matA, matB, &beta, matC, CUDA_R_64F,
-                 CUSPARSE_SPMM_ALG_DEFAULT, dBuffer))
+                 CUSPARSE_SPMM_ALG_DEFAULT, dBuffer));
+
+    // 结束计时
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+
+    float milliseconds = 0.0f;
+    cudaEventElapsedTime(&milliseconds, start, stop);
+    double kernel_time = milliseconds / 1000.0; // 转成秒
+
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
     
     // Destroy matrix descriptors
     cusparseDestroySpMat(matA);
@@ -102,6 +125,5 @@ double Matrix::calculate() {
     cudaFree(dC);
     
     double end = getTime();
-    return (double)(end-start);
-}
+    return kernel_time;
 
