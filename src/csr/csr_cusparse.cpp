@@ -97,18 +97,20 @@ double Matrix::calculate() {
     // 精确计时（ITER次平均）
     const int ITER = 200;   // ✅ 与论文相同
     cudaEventRecord(start, 0);
-    cusparseSpMM(handle,
-        CUSPARSE_OPERATION_NON_TRANSPOSE,
-        CUSPARSE_OPERATION_TRANSPOSE,   // ✅ 注意保持一致
-        &alpha, matA, matB, &beta, matC,
-        CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, dBuffer);
+    for (int i = 0; i < ITER; i++) {
+        cusparseSpMM(handle,
+            CUSPARSE_OPERATION_NON_TRANSPOSE,
+            CUSPARSE_OPERATION_TRANSPOSE,   // ✅ 注意保持一致
+            &alpha, matA, matB, &beta, matC,
+            CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, dBuffer);
+    }
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
 
     // 计算平均时间
     float milliseconds = 0.0f;
     cudaEventElapsedTime(&milliseconds, start, stop);
-    double kernel_time = (milliseconds / ITER) / 1000.0;  // 单次平均秒数
+    double kernel_time = (milliseconds / ITER) / 1000.0 / ITER;  // 单次平均秒数
 
     cudaEventDestroy(start);
     cudaEventDestroy(stop);
